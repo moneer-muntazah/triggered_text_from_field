@@ -40,7 +40,7 @@ class _MyAppState extends State<MyApp> {
                   trigger: (value) async {
                     final message = await Future.delayed(
                         Duration(seconds: 2), () => 'there was an error');
-                    return message;
+                    return TriggerResponse(message, color: Colors.amber);
                   },
                 ),
                 const SizedBox(height: 15),
