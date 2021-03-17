@@ -10,10 +10,8 @@ class TriggerResponse {
   final String message;
   final Color color;
 
-  /// Set true if the async call is used for validation to prevent the
-  /// submission of the form. Setting this to true will cause the validate call
-  /// on the instant of the [FormState] to return false even if the validator
-  /// call back return null.
+  /// Set to true if the async call is used for validation, and use to prevent
+  /// the submission of the form.
   final bool useForValidation;
 
   @override
@@ -22,13 +20,13 @@ class TriggerResponse {
 }
 
 /// Similar to [TextFormField], but can be trigger an async callback when the
-/// value inputted reaches a specified length.
+/// value inputted matches a specified pattern.
 class TriggeredTextFormField extends FormField<String> {
   TriggeredTextFormField(
       {Key key,
       String initialValue,
       @required this.trigger,
-      @required this.triggerLength,
+      @required String pattern,
       this.onLoading,
       int maxLength,
       String labelText,
@@ -36,14 +34,8 @@ class TriggeredTextFormField extends FormField<String> {
       FormFieldSetter<String> onSaved,
       InputBorder border = const OutlineInputBorder()})
       : assert(trigger != null),
-        assert(triggerLength != null),
-        assert(() {
-          if (maxLength == null) return true;
-          if (triggerLength > maxLength) return false;
-          return true;
-        }(),
-            'Since triggerLength is used to know when to fire the trigger '
-            'callback, maxLength cannot exceed it'),
+        assert(pattern != null),
+        regex = RegExp(pattern),
         super(
             key: key,
             initialValue: initialValue ?? '',
@@ -78,7 +70,7 @@ class TriggeredTextFormField extends FormField<String> {
                   errorMaxLines: 3,
                   counterText: '',
                   contentPadding: const EdgeInsets.all(15),
-                  border: const OutlineInputBorder(),
+                  border: border,
                   suffixIcon: triggeredField._isLoading
                       ? Transform(
                           transform: Matrix4.translationValues(
@@ -104,7 +96,7 @@ class TriggeredTextFormField extends FormField<String> {
               );
             });
 
-  final int triggerLength;
+  final RegExp regex;
   final _Trigger trigger;
   final _onLoadingNotifier onLoading;
 
@@ -144,7 +136,7 @@ class _TriggeredTextFormFieldState extends FormFieldState<String> {
       setValue(controller.text);
       _previousText = controller.text;
       response = null;
-      if (controller.text.length == widget.triggerLength) {
+      if (widget.regex.hasMatch(controller.text)) {
         _previousText = controller.text;
         setState(() {
           isLoading = true;
