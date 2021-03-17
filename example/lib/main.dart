@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:triggered_text_form_field/triggered_text_form_field.dart';
-import 'package:triggered_text_form_field/testing_another.dart';
+// import 'package:triggered_text_form_field/testing_another.dart';
 
 void main() {
   runApp(MyApp());
@@ -62,21 +62,21 @@ class _MyAppState extends State<MyApp> {
                     validator: (value) {
                       print(value);
                       if (value.isEmpty) return 'required field';
-                      if (value == '12345678') return 'cannot be that easy';
-                      if (value == '12345') return 'cannot be that easy';
+                      // if (value == '12345678') return 'cannot be 12345678';
+                      // if (value == '12345') return 'cannot be 12345';
                       print('validator says null');
                       return null;
                     },
                     trigger: (value) async {
                       try {
                         final message = await Future.delayed(
-                            Duration(seconds: 2), () => 'there was an error');
-                        throw Exception();
+                            Duration(seconds: 2),
+                            () => 'there was an error with $value');
                         return value == '12345'
-                            ? TriggerResponse(message, useForValidation: false)
+                            ? TriggerResponse(message, useForValidation: true)
                             : TriggerResponse(message,
                                 color: Colors.deepOrange,
-                                useForValidation: true);
+                                useForValidation: false);
                       } catch (e) {
                         print('exception');
                         rethrow;
