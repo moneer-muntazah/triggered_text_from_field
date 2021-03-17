@@ -47,7 +47,7 @@ class _MyAppState extends State<MyApp> {
                   ),
                   const SizedBox(height: 15),
                   TriggeredTextFormField(
-                    initialValue: "123",
+                    initialValue: "12345",
                     predicate: (value) =>
                         RegExp(r'^[0-9]{5}$').hasMatch(value) ||
                         RegExp(r'^[0-9]{8}$').hasMatch(value),
@@ -72,10 +72,10 @@ class _MyAppState extends State<MyApp> {
                         final message = await Future.delayed(
                             Duration(seconds: 2), () => 'there was an error');
                         return value == '12345'
-                            ? TriggerResponse(message,
-                                color: Colors.amber, useForValidation: false)
+                            ? TriggerResponse(message, useForValidation: false)
                             : TriggerResponse(message,
-                                color: Colors.green, useForValidation: false);
+                                color: Colors.deepOrange,
+                                useForValidation: true);
                       } catch (e) {
                         print('exception');
                         return null;
