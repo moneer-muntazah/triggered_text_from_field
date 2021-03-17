@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:triggered_text_form_field/triggered_text_form_field.dart';
 import 'package:triggered_text_form_field/testing_another.dart';
 
@@ -47,8 +48,11 @@ class _MyAppState extends State<MyApp> {
                   const SizedBox(height: 15),
                   TriggeredTextFormField(
                     initialValue: "123",
-                    pattern: r'^[0-9]{5}$',
+                    predicate: (value) =>
+                        RegExp(r'^[0-9]{5}$').hasMatch(value) ||
+                        RegExp(r'^[0-9]{8}$').hasMatch(value),
                     maxLength: 8,
+                    keyboardType: TextInputType.number,
                     onSaved: (value) {
                       print('saved $value');
                     },
@@ -64,10 +68,18 @@ class _MyAppState extends State<MyApp> {
                       return null;
                     },
                     trigger: (value) async {
-                      final message = await Future.delayed(
-                          Duration(seconds: 2), () => 'there was an error');
-                      return TriggerResponse(message,
-                          color: Colors.amber, useForValidation: false);
+                      try {
+                        final message = await Future.delayed(
+                            Duration(seconds: 2), () => 'there was an error');
+                        return value == '12345'
+                            ? TriggerResponse(message,
+                                color: Colors.amber, useForValidation: false)
+                            : TriggerResponse(message,
+                                color: Colors.green, useForValidation: false);
+                      } catch (e) {
+                        print('exception');
+                        return null;
+                      }
                     },
                   ),
                   const SizedBox(height: 15),

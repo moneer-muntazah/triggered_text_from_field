@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 typedef _Trigger = FutureOr<TriggerResponse> Function(String);
+typedef _TriggerPredicate = bool Function(String);
 typedef _onLoadingNotifier = void Function(bool);
 
 class TriggerResponse {
@@ -19,85 +20,85 @@ class TriggerResponse {
       'useForValidation: $useForValidation }';
 }
 
-/// Similar to [TextFormField], but can be trigger an async callback when the
-/// value inputted matches a specified pattern.
+/// Similar to [TextFormField], but can trigger an async callback given a
+/// specified predicate.
 class TriggeredTextFormField extends FormField<String> {
   TriggeredTextFormField(
       {Key key,
-      String initialValue,
-      @required this.trigger,
-      @required String pattern,
-      this.onLoading,
-      int maxLength,
-      String labelText,
-      FormFieldValidator<String> validator,
-      FormFieldSetter<String> onSaved,
-      InputBorder border = const OutlineInputBorder()})
+        String initialValue,
+        @required this.trigger,
+        @required this.predicate,
+        this.onLoading,
+        TextInputType keyboardType,
+        int maxLength,
+        String labelText,
+        FormFieldValidator<String> validator,
+        FormFieldSetter<String> onSaved,
+        InputBorder border = const OutlineInputBorder()})
       : assert(trigger != null),
-        assert(pattern != null),
-        regex = RegExp(pattern),
         super(
-            key: key,
-            initialValue: initialValue ?? '',
-            validator: validator,
-            onSaved: onSaved,
-            builder: (field) {
-              final triggeredField = field as _TriggeredTextFormFieldState;
-              var errorText = triggeredField.errorText;
-              InputBorder errorBorder, focusedErrorBorder;
-              TextStyle errorStyle;
-              final errorColor = triggeredField?.response?.color;
-              if (errorColor != null) {
-                errorText = triggeredField.response.message;
-                errorBorder = border.copyWith(
-                  borderSide: BorderSide(color: errorColor),
-                );
-                focusedErrorBorder = border.copyWith(
-                  borderSide: BorderSide(color: errorColor, width: 2.0),
-                );
-                errorStyle = TextStyle(color: errorColor);
-              }
-              return TextField(
-                controller: triggeredField.controller,
-                enabled: !triggeredField._isLoading,
-                maxLength: maxLength,
-                decoration: InputDecoration(
-                  labelText: labelText,
-                  errorText: errorText,
-                  errorBorder: errorBorder,
-                  focusedErrorBorder: focusedErrorBorder,
-                  errorStyle: errorStyle,
-                  errorMaxLines: 3,
-                  counterText: '',
-                  contentPadding: const EdgeInsets.all(15),
-                  border: border,
-                  suffixIcon: triggeredField._isLoading
-                      ? Transform(
-                          transform: Matrix4.translationValues(
-                              Directionality.of(triggeredField.context) ==
-                                      TextDirection.ltr
-                                  ? -10.0
-                                  : 10.0,
-                              0,
-                              0),
-                          child: CircularProgressIndicator(
-                            strokeWidth: 1.5,
-                            valueColor: AlwaysStoppedAnimation(
-                              Theme.of(triggeredField.context)
-                                  .disabledColor
-                                  .withOpacity(0.12),
-                            ),
-                          ),
-                        )
-                      : const SizedBox(),
-                  suffixIconConstraints:
-                      const BoxConstraints(maxWidth: 20, maxHeight: 20),
-                ),
+          key: key,
+          initialValue: initialValue ?? '',
+          validator: validator,
+          onSaved: onSaved,
+          builder: (field) {
+            final triggeredField = field as _TriggeredTextFormFieldState;
+            var errorText = triggeredField.errorText;
+            InputBorder errorBorder, focusedErrorBorder;
+            TextStyle errorStyle;
+            final errorColor = triggeredField?.response?.color;
+            if (errorColor != null) {
+              errorText = triggeredField.response.message;
+              errorBorder = border.copyWith(
+                borderSide: BorderSide(color: errorColor),
               );
-            });
+              focusedErrorBorder = border.copyWith(
+                borderSide: BorderSide(color: errorColor, width: 2.0),
+              );
+              errorStyle = TextStyle(color: errorColor);
+            }
+            return TextField(
+              controller: triggeredField.controller,
+              enabled: !triggeredField._isLoading,
+              maxLength: maxLength,
+              keyboardType: keyboardType,
+              decoration: InputDecoration(
+                labelText: labelText,
+                errorText: errorText,
+                errorBorder: errorBorder,
+                focusedErrorBorder: focusedErrorBorder,
+                errorStyle: errorStyle,
+                errorMaxLines: 3,
+                counterText: '',
+                contentPadding: const EdgeInsets.all(15),
+                border: border,
+                suffixIcon: triggeredField._isLoading
+                    ? Transform(
+                  transform: Matrix4.translationValues(
+                      Directionality.of(triggeredField.context) ==
+                          TextDirection.ltr
+                          ? -10.0
+                          : 10.0,
+                      0,
+                      0),
+                  child: CircularProgressIndicator(
+                    strokeWidth: 1.5,
+                    valueColor: AlwaysStoppedAnimation(
+                      Theme.of(triggeredField.context)
+                          .disabledColor
+                          .withOpacity(0.12),
+                    ),
+                  ),
+                )
+                    : const SizedBox(),
+                suffixIconConstraints:
+                const BoxConstraints(maxWidth: 20, maxHeight: 20),
+              ),
+            );
+          });
 
-  final RegExp regex;
   final _Trigger trigger;
+  final _TriggerPredicate predicate;
   final _onLoadingNotifier onLoading;
 
   @override
@@ -122,6 +123,7 @@ class _TriggeredTextFormFieldState extends FormFieldState<String> {
     _isLoading = value;
   }
 
+  @override
   TriggeredTextFormField get widget => super.widget as TriggeredTextFormField;
 
   @override
@@ -136,7 +138,7 @@ class _TriggeredTextFormFieldState extends FormFieldState<String> {
       setValue(controller.text);
       _previousText = controller.text;
       response = null;
-      if (widget.regex.hasMatch(controller.text)) {
+      if (widget.predicate(controller.text)) {
         _previousText = controller.text;
         setState(() {
           isLoading = true;
