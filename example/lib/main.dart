@@ -71,6 +71,7 @@ class _MyAppState extends State<MyApp> {
                       try {
                         final message = await Future.delayed(
                             Duration(seconds: 2), () => 'there was an error');
+                        throw Exception();
                         return value == '12345'
                             ? TriggerResponse(message, useForValidation: false)
                             : TriggerResponse(message,
@@ -78,7 +79,7 @@ class _MyAppState extends State<MyApp> {
                                 useForValidation: true);
                       } catch (e) {
                         print('exception');
-                        return null;
+                        rethrow;
                       }
                     },
                   ),

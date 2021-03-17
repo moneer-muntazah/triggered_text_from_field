@@ -145,10 +145,16 @@ class _TriggeredTextFormFieldState extends FormFieldState<String> {
         setState(() {
           isLoading = true;
         });
-        response = await widget.trigger(controller.text);
-        setState(() {
+        try {
+          response = await widget.trigger(controller.text);
+          setState(() {
+            isLoading = false;
+          });
+        } catch (e) {
           isLoading = false;
-        });
+          reset();
+          controller.text = _previousText = value;
+        }
       }
     });
   }
