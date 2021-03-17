@@ -30,17 +30,32 @@ class _MyAppState extends State<MyApp> {
               children: <Widget>[
                 // TestingAnother(),
                 // const SizedBox(height: 15),
+                TextFormField(
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    contentPadding: const EdgeInsets.all(15),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'required field';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 15),
                 TriggeredTextFormField(
                   triggerLength: 8,
                   validator: (value) {
                     if (value == null || value.isEmpty) return 'required field';
                     if (value == '12345678') return 'cannot be that easy';
+                    print('done');
                     return null;
                   },
                   trigger: (value) async {
                     final message = await Future.delayed(
                         Duration(seconds: 2), () => 'there was an error');
-                    return TriggerResponse(message, color: Colors.amber);
+                    return TriggerResponse(message, color: Colors.amber,
+                    useForValidation: true);
                   },
                 ),
                 const SizedBox(height: 15),
