@@ -1,12 +1,14 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 
-typedef _Trigger = FutureOr<TriggerResponse> Function(String);
-typedef _TriggerPredicate = bool Function(String);
-typedef _onLoadingNotifier = void Function(bool);
+typedef Trigger = FutureOr<TriggerResponse> Function(String);
+typedef TriggerPredicate = bool Function(String);
+typedef onLoadingNotifier = void Function(bool);
 
 class TriggerResponse {
-  const TriggerResponse(this.message, {this.color, this.useForValidation});
+  const TriggerResponse(this.message,
+      {this.color, this.useForValidation = false})
+      : assert(useForValidation != null);
 
   final String message;
   final Color color;
@@ -98,9 +100,9 @@ class TriggeredTextFormField extends FormField<String> {
               );
             });
 
-  final _Trigger trigger;
-  final _TriggerPredicate predicate;
-  final _onLoadingNotifier onLoading;
+  final Trigger trigger;
+  final TriggerPredicate predicate;
+  final onLoadingNotifier onLoading;
 
   @override
   _TriggeredTextFormFieldState createState() => _TriggeredTextFormFieldState();

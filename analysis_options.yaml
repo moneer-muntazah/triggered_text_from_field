@@ -1,0 +1,10 @@
+include: package:pedantic/analysis_options.yaml
+
+analyzer:
+  exclude:
+    - lib/main.mapper.g.dart
+
+linter:
+  rules:
+    - directives_ordering
+    - avoid_types_on_closure_parameters
