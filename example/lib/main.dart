@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:triggered_text_form_field/triggered_text_form_field.dart';
-// import 'package:triggered_text_form_field/testing_another.dart';
 
 void main() {
   runApp(MyApp());
@@ -30,8 +29,6 @@ class _MyAppState extends State<MyApp> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  // TestingAnother(),
-                  // const SizedBox(height: 15),
                   TextFormField(
                     maxLines: 30,
                     decoration: const InputDecoration(
