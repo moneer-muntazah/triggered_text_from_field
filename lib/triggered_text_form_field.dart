@@ -35,8 +35,7 @@ class TriggeredTextFormField extends FormField<String> {
       int maxLength,
       String labelText,
       FormFieldValidator<String> validator,
-      FormFieldSetter<String> onSaved,
-      InputBorder border = const OutlineInputBorder()})
+      FormFieldSetter<String> onSaved})
       : assert(trigger != null),
         super(
             key: key,
@@ -51,6 +50,9 @@ class TriggeredTextFormField extends FormField<String> {
               if (triggeredField?.response != null) {
                 final errorColor = triggeredField.response?.color ??
                     Theme.of(triggeredField.context).errorColor;
+                final border = Theme.of(triggeredField.context)
+                    .inputDecorationTheme
+                    .border;
                 errorText = triggeredField.response.message;
                 errorBorder = border.copyWith(
                   borderSide: BorderSide(color: errorColor),
@@ -73,8 +75,6 @@ class TriggeredTextFormField extends FormField<String> {
                   errorStyle: errorStyle,
                   errorMaxLines: 3,
                   counterText: '',
-                  contentPadding: const EdgeInsets.all(15),
-                  border: border,
                   suffixIcon: triggeredField._isLoading
                       ? Transform(
                           transform: Matrix4.translationValues(

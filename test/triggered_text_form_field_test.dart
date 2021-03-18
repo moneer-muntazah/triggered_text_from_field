@@ -19,8 +19,7 @@ extension CopyWith on TriggeredTextFormField {
       int maxLength,
       String labelText,
       FormFieldValidator<String> validator,
-      FormFieldSetter<String> onSaved,
-      InputBorder border = const OutlineInputBorder()}) {
+      FormFieldSetter<String> onSaved}) {
     return TriggeredTextFormField(
       key: key,
       initialValue: initialValue ?? this.initialValue,
@@ -32,7 +31,6 @@ extension CopyWith on TriggeredTextFormField {
       labelText: labelText,
       validator: validator ?? this.validator,
       onSaved: onSaved ?? this.onSaved,
-      border: border,
     );
   }
 }
@@ -51,6 +49,17 @@ void main() {
   });
 
   MaterialApp createApp(TriggeredTextFormField field) => MaterialApp(
+        theme: ThemeData(
+          inputDecorationTheme: const InputDecorationTheme(
+            labelStyle: TextStyle(fontSize: 15),
+            border: OutlineInputBorder(),
+            enabledBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.black12),
+            ),
+            alignLabelWithHint: true,
+            contentPadding: EdgeInsets.all(15),
+          ),
+        ),
         home: Scaffold(
           body: Form(
             key: formKey,
