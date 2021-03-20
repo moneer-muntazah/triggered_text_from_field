@@ -37,6 +37,11 @@ extension CopyWith on TriggeredTextFormField {
   }
 }
 
+extension FindStateByType on WidgetTester {
+  S stateByType<S extends State<StatefulWidget>, T>() =>
+      state<S>(find.byType(T));
+}
+
 MaterialApp createApp(TriggeredTextFormField field) => MaterialApp(
       theme: ThemeData(
         errorColor: errorColor,
@@ -54,9 +59,6 @@ MaterialApp createApp(TriggeredTextFormField field) => MaterialApp(
         body: Form(child: field),
       ),
     );
-
-S state<S extends State<StatefulWidget>, T>(WidgetTester tester) =>
-    tester.state<S>(find.byType(T));
 
 void main() {
   // Not yet done with this test. It is only true on initial screen load.
@@ -76,8 +78,8 @@ void main() {
       );
       await tester.pumpWidget(app);
       expect(find.text(triggerMessage1), findsNothing);
-      expect(state<FormState, Form>(tester).validate(), true);
-      expect(state<FormFieldState, TriggeredTextFormField>(tester).value,
+      expect(tester.stateByType<FormState, Form>().validate(), true);
+      expect(tester.stateByType<FormFieldState, TriggeredTextFormField>().value,
           initialValue1);
     });
 
@@ -85,8 +87,8 @@ void main() {
       final app = createApp(triggeredField);
       await tester.pumpWidget(app);
       expect(find.text(triggerMessage1), findsNothing);
-      expect(state<FormState, Form>(tester).validate(), true);
-      expect(state<FormFieldState, TriggeredTextFormField>(tester).value,
+      expect(tester.stateByType<FormState, Form>().validate(), true);
+      expect(tester.stateByType<FormFieldState, TriggeredTextFormField>().value,
           initialValue1);
     });
   });
@@ -116,9 +118,9 @@ void main() {
       expect(triggeredMessage1Finder, findsOneWidget);
       expect(
           tester.widget<Text>(triggeredMessage1Finder).style.color, errorColor);
-      expect(state<FormState, Form>(tester).validate(), false);
-      expect(
-          state<FormFieldState, TriggeredTextFormField>(tester).value, input1);
+      expect(tester.stateByType<FormState, Form>().validate(), false);
+      expect(tester.stateByType<FormFieldState, TriggeredTextFormField>().value,
+          input1);
       await tester.pump();
       expect(triggeredMessage1Finder, findsOneWidget);
       expect(
@@ -151,9 +153,9 @@ void main() {
       expect(triggeredMessage1Finder, findsOneWidget);
       expect(
           tester.widget<Text>(triggeredMessage1Finder).style.color, errorColor);
-      expect(state<FormState, Form>(tester).validate(), true);
-      expect(
-          state<FormFieldState, TriggeredTextFormField>(tester).value, input1);
+      expect(tester.stateByType<FormState, Form>().validate(), true);
+      expect(tester.stateByType<FormFieldState, TriggeredTextFormField>().value,
+          input1);
     });
 
     group('when a validation is first invoked then that value is entered ', () {
@@ -173,7 +175,7 @@ void main() {
         expect(triggeredMessage1Finder, findsNothing);
         final validationMessage1Finder = find.text(validationMessage1);
         expect(validationMessage1Finder, findsNothing);
-        expect(state<FormState, Form>(tester).validate(), false);
+        expect(tester.stateByType<FormState, Form>().validate(), false);
         await tester.pump();
         expect(validationMessage1Finder, findsOneWidget);
         expect(tester.widget<Text>(validationMessage1Finder).style.color,
@@ -183,9 +185,10 @@ void main() {
         expect(triggeredMessage1Finder, findsOneWidget);
         expect(tester.widget<Text>(triggeredMessage1Finder).style.color,
             warningColor);
-        expect(state<FormState, Form>(tester).validate(), false);
+        expect(tester.stateByType<FormState, Form>().validate(), false);
         await tester.pump();
-        expect(state<FormFieldState, TriggeredTextFormField>(tester).value,
+        expect(
+            tester.stateByType<FormFieldState, TriggeredTextFormField>().value,
             input1);
         expect(triggeredMessage1Finder, findsOneWidget);
         expect(tester.widget<Text>(triggeredMessage1Finder).style.color,
@@ -206,7 +209,7 @@ void main() {
         expect(triggeredMessage1Finder, findsNothing);
         final validationMessage1Finder = find.text(validationMessage1);
         expect(validationMessage1Finder, findsNothing);
-        expect(state<FormState, Form>(tester).validate(), false);
+        expect(tester.stateByType<FormState, Form>().validate(), false);
         await tester.pump();
         expect(validationMessage1Finder, findsOneWidget);
         expect(tester.widget<Text>(validationMessage1Finder).style.color,
@@ -216,8 +219,9 @@ void main() {
         expect(triggeredMessage1Finder, findsOneWidget);
         expect(tester.widget<Text>(triggeredMessage1Finder).style.color,
             warningColor);
-        expect(state<FormState, Form>(tester).validate(), true);
-        expect(state<FormFieldState, TriggeredTextFormField>(tester).value,
+        expect(tester.stateByType<FormState, Form>().validate(), true);
+        expect(
+            tester.stateByType<FormFieldState, TriggeredTextFormField>().value,
             input1);
       });
     });
@@ -247,9 +251,9 @@ void main() {
       expect(triggeredMessage1Finder, findsOneWidget);
       expect(
           tester.widget<Text>(triggeredMessage1Finder).style.color, errorColor);
-      expect(state<FormState, Form>(tester).validate(), false);
-      expect(
-          state<FormFieldState, TriggeredTextFormField>(tester).value, input1);
+      expect(tester.stateByType<FormState, Form>().validate(), false);
+      expect(tester.stateByType<FormFieldState, TriggeredTextFormField>().value,
+          input1);
       await tester.pump();
       expect(triggeredMessage1Finder, findsOneWidget);
       expect(
@@ -260,9 +264,9 @@ void main() {
       expect(triggeredMessage2Finder, findsOneWidget);
       expect(tester.widget<Text>(triggeredMessage2Finder).style.color,
           warningColor);
-      expect(state<FormState, Form>(tester).validate(), true);
-      expect(
-          state<FormFieldState, TriggeredTextFormField>(tester).value, input2);
+      expect(tester.stateByType<FormState, Form>().validate(), true);
+      expect(tester.stateByType<FormFieldState, TriggeredTextFormField>().value,
+          input2);
     });
   });
 }
