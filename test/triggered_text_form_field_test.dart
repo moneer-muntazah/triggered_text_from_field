@@ -6,20 +6,15 @@ const errorColor = Colors.red;
 const warningColor = Colors.amber;
 const labelText = 'Label Text';
 const initialValue1 = '01234';
-
-/// Use [message1], and [message2] for for trigger returns.
-const message1 = 'message1';
-const message2 = 'message2';
-
-/// Use [validation1] for validator returns.
-const validation1 = 'validation1';
+const triggerMessage1 = 'triggerMessage1';
+const triggerMessage2 = 'triggerMessage2';
+const validationMessage1 = 'validationMessage1';
 const input1 = '01234';
 const input2 = '0123456789';
 
 extension CopyWith on TriggeredTextFormField {
   TriggeredTextFormField copyWith(
-      {Key key,
-      String initialValue,
+      {String initialValue,
       Trigger trigger,
       TriggerPredicate predicate,
       onLoadingNotifier onLoading,
@@ -29,7 +24,6 @@ extension CopyWith on TriggeredTextFormField {
       FormFieldValidator<String> validator,
       FormFieldSetter<String> onSaved}) {
     return TriggeredTextFormField(
-      key: key ?? this.key,
       initialValue: initialValue ?? this.initialValue,
       trigger: trigger ?? this.trigger,
       predicate: predicate ?? this.predicate,
@@ -43,133 +37,123 @@ extension CopyWith on TriggeredTextFormField {
   }
 }
 
-void main() {
-  GlobalKey<FormFieldState> fieldKey;
-
-  setUp(() {
-    fieldKey = GlobalKey<FormFieldState>();
-  });
-
-  MaterialApp createApp(TriggeredTextFormField field) => MaterialApp(
-        theme: ThemeData(
-          errorColor: errorColor,
-          inputDecorationTheme: const InputDecorationTheme(
-            labelStyle: TextStyle(fontSize: 15),
-            border: OutlineInputBorder(),
-            enabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.black12),
-            ),
-            alignLabelWithHint: true,
-            contentPadding: EdgeInsets.all(15),
+MaterialApp createApp(TriggeredTextFormField field) => MaterialApp(
+      theme: ThemeData(
+        errorColor: errorColor,
+        inputDecorationTheme: const InputDecorationTheme(
+          labelStyle: TextStyle(fontSize: 15),
+          border: OutlineInputBorder(),
+          enabledBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.black12),
           ),
+          alignLabelWithHint: true,
+          contentPadding: EdgeInsets.all(15),
         ),
-        home: Scaffold(
-          body: Form(child: field),
-        ),
-      );
+      ),
+      home: Scaffold(
+        body: Form(child: field),
+      ),
+    );
 
+S state<S extends State<StatefulWidget>, T>(WidgetTester tester) =>
+    tester.state<S>(find.byType(T));
+
+void main() {
   // Not yet done with this test. It is only true on initial screen load.
   group(
       'initialValue does not cause any trigger behavior when the initialValue'
       'is submitted', () {
-    final triggerTextFormField = TriggeredTextFormField(
+    final triggeredField = TriggeredTextFormField(
         initialValue: initialValue1,
-        trigger: (value) => TriggerResponse(message1),
+        trigger: (value) => TriggerResponse(triggerMessage1),
         predicate: (value) => value == initialValue1);
     testWidgets('with useForValidation being true', (tester) async {
       final app = createApp(
-        triggerTextFormField.copyWith(
-          key: fieldKey,
-          trigger: (value) => TriggerResponse(message1, useForValidation: true),
+        triggeredField.copyWith(
+          trigger: (value) =>
+              TriggerResponse(triggerMessage1, useForValidation: true),
         ),
       );
       await tester.pumpWidget(app);
-      expect(find.text(message1), findsNothing);
-      final formState = tester.state<FormState>(
-        find.byType(Form),
-      );
-      expect(formState.validate(), true);
-      expect(fieldKey.currentState.value, initialValue1);
+      expect(find.text(triggerMessage1), findsNothing);
+      expect(state<FormState, Form>(tester).validate(), true);
+      expect(state<FormFieldState, TriggeredTextFormField>(tester).value,
+          initialValue1);
     });
 
     testWidgets('with useForValidation being false', (tester) async {
-      final app = createApp(
-        triggerTextFormField.copyWith(key: fieldKey),
-      );
+      final app = createApp(triggeredField);
       await tester.pumpWidget(app);
-      expect(find.text(message1), findsNothing);
-      final formState = tester.state<FormState>(
-        find.byType(Form),
-      );
-      expect(formState.validate(), true);
-      expect(fieldKey.currentState.value, initialValue1);
+      expect(find.text(triggerMessage1), findsNothing);
+      expect(state<FormState, Form>(tester).validate(), true);
+      expect(state<FormFieldState, TriggeredTextFormField>(tester).value,
+          initialValue1);
     });
   });
 
   group(
       'Given some value that satisfies the predicate trigger behavior is as '
       'expected', () {
-    final triggerTextFormField = TriggeredTextFormField(
-        trigger: (value) => TriggerResponse(message1),
+    final triggeredField = TriggeredTextFormField(
+        trigger: (value) => TriggerResponse(triggerMessage1),
         predicate: (value) => value == input1);
     testWidgets(
         'when that value is entered, attempted to be submitted, edited, and '
         'entered again with useForValidation being true', (tester) async {
       final app = createApp(
-        triggerTextFormField.copyWith(
-          key: fieldKey,
-          trigger: (value) => TriggerResponse(message1, useForValidation: true),
+        triggeredField.copyWith(
+          trigger: (value) =>
+              TriggerResponse(triggerMessage1, useForValidation: true),
         ),
       );
       await tester.pumpWidget(app);
       final field = find.byType(TriggeredTextFormField);
       expect(field, findsOneWidget);
-      final message1Finder = find.text(message1);
-      expect(message1Finder, findsNothing);
+      final triggeredMessage1Finder = find.text(triggerMessage1);
+      expect(triggeredMessage1Finder, findsNothing);
       await tester.enterText(field, input1);
       await tester.pump();
-      expect(message1Finder, findsOneWidget);
-      expect(tester.widget<Text>(message1Finder).style.color, errorColor);
-      final formState = tester.state<FormState>(
-        find.byType(Form),
-      );
-      expect(formState.validate(), false);
-      expect(fieldKey.currentState.value, input1);
+      expect(triggeredMessage1Finder, findsOneWidget);
+      expect(
+          tester.widget<Text>(triggeredMessage1Finder).style.color, errorColor);
+      expect(state<FormState, Form>(tester).validate(), false);
+      expect(
+          state<FormFieldState, TriggeredTextFormField>(tester).value, input1);
       await tester.pump();
-      expect(message1Finder, findsOneWidget);
-      expect(tester.widget<Text>(message1Finder).style.color, errorColor);
+      expect(triggeredMessage1Finder, findsOneWidget);
+      expect(
+          tester.widget<Text>(triggeredMessage1Finder).style.color, errorColor);
       final newInput = input1.substring(0, input1.length - 1);
       await tester.enterText(field, newInput);
       await tester.pump();
-      expect(message1Finder, findsOneWidget);
-      expect(tester.widget<Text>(message1Finder).style.color, errorColor);
+      expect(triggeredMessage1Finder, findsOneWidget);
+      expect(
+          tester.widget<Text>(triggeredMessage1Finder).style.color, errorColor);
       await tester.enterText(field, input1);
       await tester.pump();
       expect(find.text(input1), findsOneWidget);
-      expect(message1Finder, findsOneWidget);
-      expect(tester.widget<Text>(message1Finder).style.color, errorColor);
+      expect(triggeredMessage1Finder, findsOneWidget);
+      expect(
+          tester.widget<Text>(triggeredMessage1Finder).style.color, errorColor);
     });
 
     testWidgets(
         'when that value is entered and submitted with useForValidation being '
         'false', (tester) async {
-      final app = createApp(
-        triggerTextFormField.copyWith(key: fieldKey),
-      );
+      final app = createApp(triggeredField);
       await tester.pumpWidget(app);
       final field = find.byType(TriggeredTextFormField);
       expect(field, findsOneWidget);
-      final message1Finder = find.text(message1);
-      expect(message1Finder, findsNothing);
+      final triggeredMessage1Finder = find.text(triggerMessage1);
+      expect(triggeredMessage1Finder, findsNothing);
       await tester.enterText(field, input1);
       await tester.pump();
-      expect(message1Finder, findsOneWidget);
-      expect(tester.widget<Text>(message1Finder).style.color, errorColor);
-      final formState = tester.state<FormState>(
-        find.byType(Form),
-      );
-      expect(formState.validate(), true);
-      expect(fieldKey.currentState.value, input1);
+      expect(triggeredMessage1Finder, findsOneWidget);
+      expect(
+          tester.widget<Text>(triggeredMessage1Finder).style.color, errorColor);
+      expect(state<FormState, Form>(tester).validate(), true);
+      expect(
+          state<FormFieldState, TriggeredTextFormField>(tester).value, input1);
     });
 
     group('when a validation is first invoked then that value is entered ', () {
@@ -177,65 +161,64 @@ void main() {
           'and attempted to be submitted with useForValidation being true',
           (tester) async {
         final app = createApp(
-          triggerTextFormField.copyWith(
-              key: fieldKey,
-              trigger: (value) => TriggerResponse(message1,
+          triggeredField.copyWith(
+              trigger: (value) => TriggerResponse(triggerMessage1,
                   useForValidation: true, color: warningColor),
-              validator: (value) => value.isEmpty ? validation1 : null),
+              validator: (value) => value.isEmpty ? validationMessage1 : null),
         );
         await tester.pumpWidget(app);
         final field = find.byType(TriggeredTextFormField);
         expect(field, findsOneWidget);
-        final message1Finder = find.text(message1);
-        expect(message1Finder, findsNothing);
-        final validation1Finder = find.text(validation1);
-        expect(validation1Finder, findsNothing);
-        final formState = tester.state<FormState>(
-          find.byType(Form),
-        );
-        expect(formState.validate(), false);
+        final triggeredMessage1Finder = find.text(triggerMessage1);
+        expect(triggeredMessage1Finder, findsNothing);
+        final validationMessage1Finder = find.text(validationMessage1);
+        expect(validationMessage1Finder, findsNothing);
+        expect(state<FormState, Form>(tester).validate(), false);
         await tester.pump();
-        expect(validation1Finder, findsOneWidget);
-        expect(tester.widget<Text>(validation1Finder).style.color, errorColor);
+        expect(validationMessage1Finder, findsOneWidget);
+        expect(tester.widget<Text>(validationMessage1Finder).style.color,
+            errorColor);
         await tester.enterText(field, input1);
         await tester.pump();
-        expect(message1Finder, findsOneWidget);
-        expect(tester.widget<Text>(message1Finder).style.color, warningColor);
-        expect(formState.validate(), false);
+        expect(triggeredMessage1Finder, findsOneWidget);
+        expect(tester.widget<Text>(triggeredMessage1Finder).style.color,
+            warningColor);
+        expect(state<FormState, Form>(tester).validate(), false);
         await tester.pump();
-        expect(fieldKey.currentState.value, input1);
-        expect(message1Finder, findsOneWidget);
-        expect(tester.widget<Text>(message1Finder).style.color, warningColor);
+        expect(state<FormFieldState, TriggeredTextFormField>(tester).value,
+            input1);
+        expect(triggeredMessage1Finder, findsOneWidget);
+        expect(tester.widget<Text>(triggeredMessage1Finder).style.color,
+            warningColor);
       });
       testWidgets('and submitted with useForValidation being false',
           (tester) async {
         final app = createApp(
-          triggerTextFormField.copyWith(
-              key: fieldKey,
+          triggeredField.copyWith(
               trigger: (value) =>
-                  TriggerResponse(message1, color: warningColor),
-              validator: (value) => value.isEmpty ? validation1 : null),
+                  TriggerResponse(triggerMessage1, color: warningColor),
+              validator: (value) => value.isEmpty ? validationMessage1 : null),
         );
         await tester.pumpWidget(app);
         final field = find.byType(TriggeredTextFormField);
         expect(field, findsOneWidget);
-        final message1Finder = find.text(message1);
-        expect(message1Finder, findsNothing);
-        final validation1Finder = find.text(validation1);
-        expect(validation1Finder, findsNothing);
-        final formState = tester.state<FormState>(
-          find.byType(Form),
-        );
-        expect(formState.validate(), false);
+        final triggeredMessage1Finder = find.text(triggerMessage1);
+        expect(triggeredMessage1Finder, findsNothing);
+        final validationMessage1Finder = find.text(validationMessage1);
+        expect(validationMessage1Finder, findsNothing);
+        expect(state<FormState, Form>(tester).validate(), false);
         await tester.pump();
-        expect(validation1Finder, findsOneWidget);
-        expect(tester.widget<Text>(validation1Finder).style.color, errorColor);
+        expect(validationMessage1Finder, findsOneWidget);
+        expect(tester.widget<Text>(validationMessage1Finder).style.color,
+            errorColor);
         await tester.enterText(field, input1);
         await tester.pump();
-        expect(message1Finder, findsOneWidget);
-        expect(tester.widget<Text>(message1Finder).style.color, warningColor);
-        expect(formState.validate(), true);
-        expect(fieldKey.currentState.value, input1);
+        expect(triggeredMessage1Finder, findsOneWidget);
+        expect(tester.widget<Text>(triggeredMessage1Finder).style.color,
+            warningColor);
+        expect(state<FormState, Form>(tester).validate(), true);
+        expect(state<FormFieldState, TriggeredTextFormField>(tester).value,
+            input1);
       });
     });
   });
@@ -243,43 +226,43 @@ void main() {
   group(
       'Given two values that satisfy the predicate trigger behavior is as '
       'expected', () {
-    final triggerTextFormField = TriggeredTextFormField(
+    final triggeredField = TriggeredTextFormField(
         trigger: (value) => value == input1
-            ? TriggerResponse(message1, useForValidation: true)
-            : TriggerResponse(message2,
+            ? TriggerResponse(triggerMessage1, useForValidation: true)
+            : TriggerResponse(triggerMessage2,
                 color: warningColor, useForValidation: false),
         predicate: (value) => value == input1 || value == input2);
     testWidgets(
         'when the first value is entered, attempted to be submitted then the '
         'second value is entered and submitted with useForValidation being true '
         'to the first value, but false to the second', (tester) async {
-      final app = createApp(
-        triggerTextFormField.copyWith(key: fieldKey),
-      );
+      final app = createApp(triggeredField);
       await tester.pumpWidget(app);
       final field = find.byType(TriggeredTextFormField);
       expect(field, findsOneWidget);
-      final message1Finder = find.text(message1);
-      expect(message1Finder, findsNothing);
+      final triggeredMessage1Finder = find.text(triggerMessage1);
+      expect(triggeredMessage1Finder, findsNothing);
       await tester.enterText(field, input1);
       await tester.pump();
-      expect(message1Finder, findsOneWidget);
-      expect(tester.widget<Text>(message1Finder).style.color, errorColor);
-      final formState = tester.state<FormState>(
-        find.byType(Form),
-      );
-      expect(formState.validate(), false);
-      expect(fieldKey.currentState.value, input1);
+      expect(triggeredMessage1Finder, findsOneWidget);
+      expect(
+          tester.widget<Text>(triggeredMessage1Finder).style.color, errorColor);
+      expect(state<FormState, Form>(tester).validate(), false);
+      expect(
+          state<FormFieldState, TriggeredTextFormField>(tester).value, input1);
       await tester.pump();
-      expect(message1Finder, findsOneWidget);
-      expect(tester.widget<Text>(message1Finder).style.color, errorColor);
+      expect(triggeredMessage1Finder, findsOneWidget);
+      expect(
+          tester.widget<Text>(triggeredMessage1Finder).style.color, errorColor);
       await tester.enterText(field, input2);
       await tester.pump();
-      final message2Finder = find.text(message2);
-      expect(message2Finder, findsOneWidget);
-      expect(tester.widget<Text>(message2Finder).style.color, warningColor);
-      expect(formState.validate(), true);
-      expect(fieldKey.currentState.value, input2);
+      final triggeredMessage2Finder = find.text(triggerMessage2);
+      expect(triggeredMessage2Finder, findsOneWidget);
+      expect(tester.widget<Text>(triggeredMessage2Finder).style.color,
+          warningColor);
+      expect(state<FormState, Form>(tester).validate(), true);
+      expect(
+          state<FormFieldState, TriggeredTextFormField>(tester).value, input2);
     });
   });
 }
