@@ -44,11 +44,9 @@ extension CopyWith on TriggeredTextFormField {
 }
 
 void main() {
-  GlobalKey<FormState> formKey;
   GlobalKey<FormFieldState> fieldKey;
 
   setUp(() {
-    formKey = GlobalKey<FormState>();
     fieldKey = GlobalKey<FormFieldState>();
   });
 
@@ -66,10 +64,7 @@ void main() {
           ),
         ),
         home: Scaffold(
-          body: Form(
-            key: formKey,
-            child: field,
-          ),
+          body: Form(child: field),
         ),
       );
 
@@ -90,7 +85,10 @@ void main() {
       );
       await tester.pumpWidget(app);
       expect(find.text(message1), findsNothing);
-      expect(formKey.currentState.validate(), true);
+      final formState = tester.state<FormState>(
+        find.byType(Form),
+      );
+      expect(formState.validate(), true);
       expect(fieldKey.currentState.value, initialValue1);
     });
 
@@ -100,7 +98,10 @@ void main() {
       );
       await tester.pumpWidget(app);
       expect(find.text(message1), findsNothing);
-      expect(formKey.currentState.validate(), true);
+      final formState = tester.state<FormState>(
+        find.byType(Form),
+      );
+      expect(formState.validate(), true);
       expect(fieldKey.currentState.value, initialValue1);
     });
   });
@@ -129,7 +130,10 @@ void main() {
       await tester.pump();
       expect(message1Finder, findsOneWidget);
       expect(tester.widget<Text>(message1Finder).style.color, errorColor);
-      expect(formKey.currentState.validate(), false);
+      final formState = tester.state<FormState>(
+        find.byType(Form),
+      );
+      expect(formState.validate(), false);
       expect(fieldKey.currentState.value, input1);
       await tester.pump();
       expect(message1Finder, findsOneWidget);
@@ -161,7 +165,10 @@ void main() {
       await tester.pump();
       expect(message1Finder, findsOneWidget);
       expect(tester.widget<Text>(message1Finder).style.color, errorColor);
-      expect(formKey.currentState.validate(), true);
+      final formState = tester.state<FormState>(
+        find.byType(Form),
+      );
+      expect(formState.validate(), true);
       expect(fieldKey.currentState.value, input1);
     });
 
@@ -183,7 +190,10 @@ void main() {
         expect(message1Finder, findsNothing);
         final validation1Finder = find.text(validation1);
         expect(validation1Finder, findsNothing);
-        expect(formKey.currentState.validate(), false);
+        final formState = tester.state<FormState>(
+          find.byType(Form),
+        );
+        expect(formState.validate(), false);
         await tester.pump();
         expect(validation1Finder, findsOneWidget);
         expect(tester.widget<Text>(validation1Finder).style.color, errorColor);
@@ -191,7 +201,7 @@ void main() {
         await tester.pump();
         expect(message1Finder, findsOneWidget);
         expect(tester.widget<Text>(message1Finder).style.color, warningColor);
-        expect(formKey.currentState.validate(), false);
+        expect(formState.validate(), false);
         await tester.pump();
         expect(fieldKey.currentState.value, input1);
         expect(message1Finder, findsOneWidget);
@@ -213,7 +223,10 @@ void main() {
         expect(message1Finder, findsNothing);
         final validation1Finder = find.text(validation1);
         expect(validation1Finder, findsNothing);
-        expect(formKey.currentState.validate(), false);
+        final formState = tester.state<FormState>(
+          find.byType(Form),
+        );
+        expect(formState.validate(), false);
         await tester.pump();
         expect(validation1Finder, findsOneWidget);
         expect(tester.widget<Text>(validation1Finder).style.color, errorColor);
@@ -221,7 +234,7 @@ void main() {
         await tester.pump();
         expect(message1Finder, findsOneWidget);
         expect(tester.widget<Text>(message1Finder).style.color, warningColor);
-        expect(formKey.currentState.validate(), true);
+        expect(formState.validate(), true);
         expect(fieldKey.currentState.value, input1);
       });
     });
@@ -252,7 +265,10 @@ void main() {
       await tester.pump();
       expect(message1Finder, findsOneWidget);
       expect(tester.widget<Text>(message1Finder).style.color, errorColor);
-      expect(formKey.currentState.validate(), false);
+      final formState = tester.state<FormState>(
+        find.byType(Form),
+      );
+      expect(formState.validate(), false);
       expect(fieldKey.currentState.value, input1);
       await tester.pump();
       expect(message1Finder, findsOneWidget);
@@ -262,7 +278,7 @@ void main() {
       final message2Finder = find.text(message2);
       expect(message2Finder, findsOneWidget);
       expect(tester.widget<Text>(message2Finder).style.color, warningColor);
-      expect(formKey.currentState.validate(), true);
+      expect(formState.validate(), true);
       expect(fieldKey.currentState.value, input2);
     });
   });
