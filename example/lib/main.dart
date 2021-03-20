@@ -17,6 +17,11 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      theme: ThemeData(
+        inputDecorationTheme: const InputDecorationTheme(
+          border: OutlineInputBorder(),
+        )
+      ),
       home: Scaffold(
         appBar: AppBar(
           title: const Text('Plugin example app'),
@@ -44,10 +49,8 @@ class _MyAppState extends State<MyApp> {
                   ),
                   const SizedBox(height: 15),
                   TriggeredTextFormField(
-                    initialValue: "12345",
-                    predicate: (value) =>
-                        RegExp(r'^[0-9]{5}$').hasMatch(value) ||
-                        RegExp(r'^[0-9]{8}$').hasMatch(value),
+                    // initialValue: "12345",
+                    predicate: (value) => value == '12345',
                     maxLength: 8,
                     keyboardType: TextInputType.number,
                     onSaved: (value) {
@@ -64,16 +67,12 @@ class _MyAppState extends State<MyApp> {
                       print('validator says null');
                       return null;
                     },
-                    trigger: (value) async {
+                    trigger: (value)  {
                       try {
-                        final message = await Future.delayed(
-                            Duration(seconds: 2),
-                            () => 'there was an error with $value');
                         return value == '12345'
-                            ? TriggerResponse(message, useForValidation: true)
-                            : TriggerResponse(message,
-                                color: Colors.deepOrange,
-                                useForValidation: false);
+                            ? TriggerResponse('some warning', useForValidation: true,
+                        color: Colors.amber)
+                            : null;
                       } catch (e) {
                         print('exception');
                         rethrow;

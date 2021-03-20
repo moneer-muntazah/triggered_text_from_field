@@ -142,7 +142,9 @@ class _TriggeredTextFormFieldState extends FormFieldState<String> {
       setValue(controller.text);
       _previousText = controller.text;
       response = null;
-      if (widget.predicate(controller.text)) {
+      if (
+      // controller.text != widget.initialValue &&
+          widget.predicate(controller.text)) {
         _previousText = controller.text;
         setState(() {
           isLoading = true;
