@@ -142,8 +142,7 @@ class _TriggeredTextFormFieldState extends FormFieldState<String> {
       setValue(controller.text);
       _previousText = controller.text;
       response = null;
-      if (
-      // controller.text != widget.initialValue &&
+      if (controller.text != widget.initialValue &&
           widget.predicate(controller.text)) {
         _previousText = controller.text;
         setState(() {

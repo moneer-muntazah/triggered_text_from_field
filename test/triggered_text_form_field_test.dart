@@ -5,7 +5,7 @@ import 'package:triggered_text_form_field/triggered_text_form_field.dart';
 const errorColor = Colors.red;
 const warningColor = Colors.amber;
 const labelText = 'Label Text';
-const initialValue1 = '01234';
+const initialValue1 = '96325';
 const triggerMessage1 = 'triggerMessage1';
 const triggerMessage2 = 'triggerMessage2';
 const validatorMessage1 = 'validatorMessage1';
@@ -65,31 +65,64 @@ MaterialApp createApp(TriggeredTextFormField field) => MaterialApp(
     );
 
 void main() {
-  // Not yet done with this test. It is only true on initial screen load.
-  group(
-      'initialValue does not cause any trigger behavior when the initialValue'
-      'is submitted', () {
+  group('initialValue does not cause any trigger behavior', () {
     final triggeredField = TriggeredTextFormField(
         initialValue: initialValue1,
         trigger: (value) => TriggerResponse(triggerMessage1),
         predicate: (value) => value == initialValue1);
-    testWidgets('with useForValidation being true', (tester) async {
+    testWidgets('when it is unchanged with useForValidation being true',
+        (tester) async {
       final app = createApp(
         triggeredField.copyWith(
-          trigger: (value) =>
-              TriggerResponse(triggerMessage1, useForValidation: true),
-        ),
+            trigger: (value) =>
+                TriggerResponse(triggerMessage1, useForValidation: true),
+            validator: (value) => value == input1 ? validatorMessage1 : null),
       );
       await tester.pumpWidget(app);
-      expect(find.text(triggerMessage1), findsNothing);
+      final field = find.byType(TriggeredTextFormField);
+      expect(field, findsOneWidget);
+      final triggerMessage1Finder = find.text(triggerMessage1);
+      expect(triggerMessage1Finder, findsNothing);
+
       expect(tester.isValidForm, true);
       expect(tester.fieldValue, initialValue1);
     });
-
-    testWidgets('with useForValidation being false', (tester) async {
+    testWidgets(
+        'when it is edited, attempted to be submitted, then entered '
+        'again with useForValidation being true', (tester) async {
+      final app = createApp(
+        triggeredField.copyWith(
+            trigger: (value) =>
+                TriggerResponse(triggerMessage1, useForValidation: true),
+            validator: (value) => value == input1 ? validatorMessage1 : null),
+      );
+      await tester.pumpWidget(app);
+      final field = find.byType(TriggeredTextFormField);
+      expect(field, findsOneWidget);
+      final triggerMessage1Finder = find.text(triggerMessage1);
+      expect(triggerMessage1Finder, findsNothing);
+      expect(tester.fieldValue, initialValue1);
+      await tester.enterText(field, input1);
+      expect(tester.isValidForm, false);
+      await tester.pump();
+      expect(tester.fieldValue, input1);
+      final validatorMessage1Finder = find.text(validatorMessage1);
+      expect(validatorMessage1Finder, findsOneWidget);
+      expect(tester.textColor(validatorMessage1), errorColor);
+      await tester.enterText(field, initialValue1);
+      await tester.pump();
+      expect(tester.isValidForm, true);
+      expect(tester.fieldValue, initialValue1);
+    });
+    testWidgets('when it is unchanged with useForValidation being false',
+        (tester) async {
       final app = createApp(triggeredField);
       await tester.pumpWidget(app);
-      expect(find.text(triggerMessage1), findsNothing);
+      final field = find.byType(TriggeredTextFormField);
+      expect(field, findsOneWidget);
+      final triggerMessage1Finder = find.text(triggerMessage1);
+      expect(triggerMessage1Finder, findsNothing);
+
       expect(tester.isValidForm, true);
       expect(tester.fieldValue, initialValue1);
     });
@@ -263,32 +296,69 @@ void main() {
             : TriggerResponse(triggerMessage2,
                 color: warningColor, useForValidation: false),
         predicate: (value) => value == input1 || value == input2);
-    testWidgets(
-        'when the first value is entered, attempted to be submitted then the '
-        'second value is entered and submitted with useForValidation being true '
-        'to the first value, but false to the second', (tester) async {
-      final app = createApp(triggeredField);
-      await tester.pumpWidget(app);
-      final field = find.byType(TriggeredTextFormField);
-      expect(field, findsOneWidget);
-      final triggerMessage1Finder = find.text(triggerMessage1);
-      expect(triggerMessage1Finder, findsNothing);
-      await tester.enterText(field, input1);
-      await tester.pump();
-      expect(triggerMessage1Finder, findsOneWidget);
-      expect(tester.textColor(triggerMessage1), errorColor);
-      expect(tester.isValidForm, false);
-      expect(tester.fieldValue, input1);
-      await tester.pump();
-      expect(triggerMessage1Finder, findsOneWidget);
-      expect(tester.textColor(triggerMessage1), errorColor);
-      await tester.enterText(field, input2);
-      await tester.pump();
-      final triggeredMessage2Finder = find.text(triggerMessage2);
-      expect(triggeredMessage2Finder, findsOneWidget);
-      expect(tester.textColor(triggerMessage2), warningColor);
-      expect(tester.isValidForm, true);
-      expect(tester.fieldValue, input2);
+    group('when the first value is entered, attempted to be submitted ', () {
+      testWidgets(
+          'second value is entered and submitted with useForValidation being '
+          'true to the first value, but false to the second', (tester) async {
+        final app = createApp(triggeredField);
+        await tester.pumpWidget(app);
+        final field = find.byType(TriggeredTextFormField);
+        expect(field, findsOneWidget);
+        final triggerMessage1Finder = find.text(triggerMessage1);
+        expect(triggerMessage1Finder, findsNothing);
+        await tester.enterText(field, input1);
+        await tester.pump();
+        expect(triggerMessage1Finder, findsOneWidget);
+        expect(tester.textColor(triggerMessage1), errorColor);
+        expect(tester.isValidForm, false);
+        expect(tester.fieldValue, input1);
+        await tester.pump();
+        expect(triggerMessage1Finder, findsOneWidget);
+        expect(tester.textColor(triggerMessage1), errorColor);
+        await tester.enterText(field, input2);
+        await tester.pump();
+        final triggeredMessage2Finder = find.text(triggerMessage2);
+        expect(triggeredMessage2Finder, findsOneWidget);
+        expect(tester.textColor(triggerMessage2), warningColor);
+        expect(tester.isValidForm, true);
+        expect(tester.fieldValue, input2);
+      });
+      testWidgets(
+          ', a validation is invoked then the second value is entered and '
+          'submitted with useForValidation being false for both values',
+          (tester) async {
+        final app = createApp(
+          triggeredField.copyWith(
+            validator: (value) => value == input1 ? validatorMessage1 : null,
+            trigger: (value) => value == input1
+                ? TriggerResponse(triggerMessage1, color: warningColor)
+                : TriggerResponse(triggerMessage2, color: warningColor),
+          ),
+        );
+        await tester.pumpWidget(app);
+        final field = find.byType(TriggeredTextFormField);
+        expect(field, findsOneWidget);
+        final triggerMessage1Finder = find.text(triggerMessage1);
+        expect(triggerMessage1Finder, findsNothing);
+        await tester.enterText(field, input1);
+        await tester.pump();
+        expect(triggerMessage1Finder, findsOneWidget);
+        expect(tester.textColor(triggerMessage1), warningColor);
+        expect(tester.isValidForm, false);
+        await tester.pump();
+        expect(tester.fieldValue, input1);
+        final validationMessage1Finder = find.text(validatorMessage1);
+        expect(validationMessage1Finder, findsOneWidget);
+        expect(tester.textColor(validatorMessage1), errorColor);
+        await tester.enterText(field, input2);
+        await tester.pump();
+        final triggerMessage2Finder = find.text(input2);
+        expect(triggerMessage2Finder, findsOneWidget);
+        expect(tester.textColor(triggerMessage2), warningColor);
+        expect(tester.isValidForm, true);
+        await tester.pump();
+        expect(tester.fieldValue, input2);
+      });
     });
   });
 }
